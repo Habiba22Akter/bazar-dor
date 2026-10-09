@@ -34,3 +34,19 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+
+
+<!-- 
+…or create a new repository on the command line
+echo "# bazar-dor" >> README.md
+git init
+git add README.md
+git commit -m "first commit"
+git branch -M main
+git remote add origin https://github.com/Habiba22Akter/bazar-dor.git
+git push -u origin main
+…or push an existing repository from the command line
+git remote add origin https://github.com/Habiba22Akter/bazar-dor.git
+git branch -M main
+git push -u origin main -->

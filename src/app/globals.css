@@ -1,24 +1,8 @@
 @import "tailwindcss";
-@import "@heroui/styles"; 
+@import "@heroui/styles";
+
 @plugin "daisyui" {
   themes: light --default;
-}
-
-@plugin "daisyui/theme" {
-  name: "bazardor";
-  default: true;
-  color-scheme: light;
-
-  --color-base-100: #fafcfa;
-  --color-base-200: #f0f5f0;
-  --color-base-300: #e1e8e1;
-  --color-base-content: #1d271f;
-
-  --color-primary: #05893e;
-  --color-primary-content: #f3fbf4;
-
-  --radius-field: 0.5rem;
-  --radius-box: 1rem;
 }
 
 :root {
@@ -32,6 +16,7 @@
   --font-sans: "Hind Siliguri", Arial, sans-serif;
 }
 
+/* Base styles */
 * {
   box-sizing: border-box;
 }
@@ -41,6 +26,12 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: "Hind Siliguri", Arial, sans-serif;
+}
+
+button,
+input,
+select {
+  font: inherit;
 }
 
 a,
@@ -56,12 +47,13 @@ button {
 }
 
 .bazar-container {
-  width: min(1152px, calc(100% - 32px));
+  width: min(1120px, calc(100% - 32px));
   margin-inline: auto;
 }
 
+/* First row */
 .bazar-topbar {
-  min-height: 68px;
+  min-height: 84px;
   padding-block: 12px;
   display: flex;
   align-items: center;
@@ -69,11 +61,13 @@ button {
   gap: 12px;
 }
 
-/* Logo এবং date */
+/* Logo and Bangla date */
 .bazar-brand {
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
+  color: inherit;
+  text-decoration: none;
 }
 
 .bazar-logo {
@@ -83,18 +77,26 @@ button {
   font-size: 24px;
   font-weight: 700;
   line-height: 1.25;
+  white-space: nowrap;
+}
+
+.bazar-logo img {
+  flex-shrink: 0;
 }
 
 .bazar-date {
   margin-top: 4px;
   font-size: 12px;
+  line-height: 1.5;
   color: #687369;
 }
 
-/* Authentication */
+/* Authentication buttons */
 .bazar-auth {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
+  justify-content: flex-end;
   gap: 10px;
 }
 
@@ -102,20 +104,59 @@ button {
   min-height: 40px;
   height: 40px;
   padding-inline: 16px;
+  border-radius: 8px;
   font-weight: 600;
+  white-space: nowrap;
+  text-decoration: none;
+}
+
+.bazar-auth .btn-primary {
+  background: #05893e;
+  border-color: #05893e;
+  color: #ffffff;
+}
+
+.bazar-auth .btn-primary:hover {
+  background: #047333;
+  border-color: #047333;
+}
+
+.bazar-auth .btn-ghost {
+  color: #1d271f;
+}
+
+.bazar-auth .btn-ghost:hover {
+  background: #e5efe6;
+}
+
+.bazar-auth .btn-outline {
+  border-color: #05893e;
+  color: #05893e;
+  background: transparent;
+}
+
+.bazar-auth .btn-outline:hover {
+  background: #05893e;
+  color: #ffffff;
+}
+
+.bazar-auth .btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .bazar-avatar {
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
   display: grid;
   place-items: center;
+  flex-shrink: 0;
   border-radius: 50%;
   background: #e1eee4;
   color: #05893e;
 }
 
-/* Category navigation */
+/* Second row: category links */
 .bazar-nav-row {
   border-top: 1px solid #e1e8e1;
 }
@@ -127,6 +168,7 @@ button {
   padding-block: 8px;
   overflow-x: auto;
   scrollbar-width: thin;
+  scrollbar-color: #cbd8cd transparent;
 }
 
 .bazar-nav-link {
@@ -134,13 +176,17 @@ button {
   align-items: center;
   flex-shrink: 0;
   gap: 5px;
-  border-radius: 8px;
   padding: 6px 12px;
+  border-radius: 8px;
+  color: #526357;
   font-size: 14px;
   font-weight: 500;
   line-height: 20px;
   white-space: nowrap;
-  transition: background 0.2s;
+  text-decoration: none;
+  transition:
+    background-color 0.2s,
+    color 0.2s;
 }
 
 .bazar-nav-link:hover {
@@ -149,7 +195,7 @@ button {
 
 .bazar-nav-link.is-active {
   background: #05893e;
-  color: #fff;
+  color: #ffffff;
 }
 
 .bazar-nav-skeleton {
@@ -158,7 +204,7 @@ button {
   flex-shrink: 0;
 }
 
-/* Scrolling price ticker */
+/* Infinite price ticker */
 .bazar-ticker {
   overflow: hidden;
   background: #f0f5f0;
@@ -179,6 +225,7 @@ button {
 .bazar-ticker-item {
   display: inline-flex;
   align-items: center;
+  flex-shrink: 0;
   gap: 8px;
   min-height: 36px;
   padding-inline: 18px;
@@ -191,9 +238,10 @@ button {
   font-weight: 600;
 }
 
+/* Price change badges */
 .bazar-change {
-  padding: 3px 7px;
-  border-radius: 6px;
+  padding: 2px 6px;
+  border-radius: 5px;
   font-size: 12px;
   line-height: 18px;
 }
@@ -213,10 +261,12 @@ button {
   background: #e8ede8;
 }
 
+/* Pause ticker on hover */
 .bazar-ticker:hover .bazar-ticker-track {
   animation-play-state: paused;
 }
 
+/* Loading and error messages */
 .bazar-ticker-loading,
 .bazar-ticker-error {
   min-height: 36px;
@@ -228,6 +278,7 @@ button {
   padding: 6px 16px;
   background: #f0f5f0;
   font-size: 13px;
+  text-align: center;
 }
 
 .bazar-ticker-error {
@@ -235,11 +286,26 @@ button {
 }
 
 .bazar-ticker-error button {
+  color: inherit;
   text-decoration: underline;
   cursor: pointer;
 }
 
+/* Keyboard focus */
+.bazar-brand:focus-visible,
+.bazar-nav-link:focus-visible,
+.bazar-auth .btn:focus-visible,
+.bazar-ticker-error button:focus-visible {
+  outline: 2px solid #05893e;
+  outline-offset: 3px;
+}
+
+/* Ticker animation */
 @keyframes bazar-marquee {
+  from {
+    transform: translateX(0);
+  }
+
   to {
     transform: translateX(-50%);
   }
@@ -247,6 +313,12 @@ button {
 
 /* Mobile */
 @media (max-width: 640px) {
+  .bazar-topbar {
+    min-height: 80px;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
   .bazar-auth {
     gap: 4px;
   }
@@ -272,13 +344,20 @@ button {
 
   .bazar-nav-link {
     padding-inline: 10px;
+    font-size: 13px;
   }
 
   .bazar-avatar {
     display: none;
   }
+
+  .bazar-ticker-item {
+    padding-inline: 14px;
+    font-size: 12px;
+  }
 }
 
+/* Small mobile */
 @media (max-width: 360px) {
   .bazar-container {
     width: calc(100% - 24px);
@@ -293,8 +372,13 @@ button {
   }
 }
 
+/* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
   .bazar-ticker-track {
     animation: none;
+  }
+
+  .bazar-nav-link {
+    transition: none;
   }
 }

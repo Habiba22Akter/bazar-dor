@@ -3,19 +3,9 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import {
-  useEffect,
-  useState,
-  useSyncExternalStore,
-} from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import toast from "react-hot-toast";
 import { authClient } from "@/lib/auth-client";
-
-const number = (value, digits = 0) =>
-  new Intl.NumberFormat("bn-BD", {
-    minimumFractionDigits: digits,
-    maximumFractionDigits: digits,
-  }).format(value);
 
 const units = {
   kg: "কেজি",
@@ -25,13 +15,19 @@ const units = {
   piece: "পিস",
 };
 
+function banglaNumber(value, digits = 0) {
+  return new Intl.NumberFormat("bn-BD", {
+    minimumFractionDigits: digits,
+    maximumFractionDigits: digits,
+  }).format(Number(value));
+}
+
 function subscribeDate(callback) {
   const timer = setInterval(callback, 60000);
-
   return () => clearInterval(timer);
 }
 
-function currentDate() {
+function getDate() {
   return new Intl.DateTimeFormat("bn-BD", {
     timeZone: "Asia/Dhaka",
     weekday: "long",
@@ -46,12 +42,9 @@ function PriceChange({ change }) {
 
   return (
     <span className={`bazar-change ${direction}`}>
-      {direction === "up"
-        ? "▲"
-        : direction === "down"
-          ? "▼"
-          : "—"}{" "}
-      {number(Math.abs(Number(change?.pct || 0)), 1)}%
+      {direction === "up" ? "▲" : direction === "down" ? "▼" : "—"}
+      {" "}
+      {banglaNumber(Math.abs(Number(change?.pct || 0)), 1)}%
     </span>
   );
 }
@@ -59,13 +52,7 @@ function PriceChange({ change }) {
 export default function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
-
-  const date = useSyncExternalStore(
-    subscribeDate,
-    currentDate,
-    () => "",
-  );
-
+  const date = useSyncExternalStore(subscribeDate, getDate, () => "");
   const { data: session, isPending } = authClient.useSession();
 
   const [catalog, setCatalog] = useState({
@@ -81,7 +68,7 @@ export default function Navbar() {
   useEffect(() => {
     const controller = new AbortController();
 
-    async function load() {
+    async function loadNavigation() {
       try {
         const response = await fetch("/api/navigation", {
           signal: controller.signal,
@@ -89,10 +76,13 @@ export default function Navbar() {
 
         const data = await response.json();
 
-        if (!response.ok) throw new Error(data.message);
+        if (!response.ok) {
+          throw new Error(data.message || "তথ্য লোড করা যায়নি");
+        }
 
         setCatalog({
-          ...data,
+          categories: data.categories,
+          products: data.products,
           loading: false,
           error: "",
         });
@@ -103,24 +93,35 @@ export default function Navbar() {
           categories: [],
           products: [],
           loading: false,
-          error:
-            error.message || "বাজারের তথ্য লোড করা যায়নি।",
+          error: error.message || "বাজারের তথ্য লোড করা যায়নি।",
         });
       }
     }
 
-    load();
+    loadNavigation();
 
     return () => controller.abort();
   }, [attempt]);
 
-  async function signOut() {
+  function retry() {
+    setCatalog((previous) => ({
+      ...previous,
+      loading: true,
+      error: "",
+    }));
+
+    setAttempt((previous) => previous + 1);
+  }
+
+  async function handleSignOut() {
     setSigningOut(true);
 
     try {
       const { error } = await authClient.signOut();
 
-      if (error) throw new Error(error.message);
+      if (error) {
+        throw new Error(error.message || "সাইন আউট করা যায়নি");
+      }
 
       toast.success("সাইন আউট হয়েছে");
       router.push("/");
@@ -134,13 +135,9 @@ export default function Navbar() {
 
   return (
     <header className="bazar-header">
-      {/* Logo, date এবং authentication buttons */}
+      {/* Logo, date এবং auth buttons */}
       <div className="bazar-container bazar-topbar">
-        <Link
-          href="/"
-          className="bazar-brand"
-          aria-label="বাজার দর হোম"
-        >
+        <Link href="/" className="bazar-brand" aria-label="বাজার দর হোম">
           <span className="bazar-logo">
             <Image
               src="/assets/logo-icon.png"
@@ -160,25 +157,22 @@ export default function Navbar() {
         <div className="bazar-auth">
           {isPending ? (
             <span
-              className="skeleton h-9 w-32"
+              className="skeleton h-10 w-32"
               aria-label="অ্যাকাউন্ট লোড হচ্ছে"
             />
           ) : session?.user ? (
             <>
-              <Link
-                href="/profile"
-                className="btn btn-ghost btn-sm bazar-profile"
-              >
+              <Link href="/profile" className="btn btn-ghost btn-sm">
                 <span className="bazar-avatar">
                   {session.user.name?.slice(0, 1) || "●"}
                 </span>
-                <span>আমার প্রোফাইল</span>
+                আমার প্রোফাইল
               </Link>
 
               <button
                 type="button"
                 className="btn btn-outline btn-sm"
-                onClick={signOut}
+                onClick={handleSignOut}
                 disabled={signingOut}
               >
                 {signingOut ? "অপেক্ষা করুন…" : "সাইন আউট"}
@@ -186,17 +180,11 @@ export default function Navbar() {
             </>
           ) : (
             <>
-              <Link
-                href="/signin"
-                className="btn btn-ghost btn-sm"
-              >
+              <Link href="/signin" className="btn btn-ghost btn-sm">
                 সাইন ইন
               </Link>
 
-              <Link
-                href="/signup"
-                className="btn btn-primary btn-sm"
-              >
+              <Link href="/signup" className="btn btn-primary btn-sm">
                 সাইন আপ
               </Link>
             </>
@@ -204,52 +192,44 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* দ্বিতীয় সারিতে category navigation */}
+      {/* দ্বিতীয় row: API categories */}
       <div className="bazar-nav-row">
         <nav
           className="bazar-container bazar-category-nav"
           aria-label="পণ্যের বিভাগ"
         >
-          <Link
+          {/* <Link
             href="/"
             className={`bazar-nav-link ${
               pathname === "/" ? "is-active" : ""
             }`}
-            aria-current={
-              pathname === "/" ? "page" : undefined
-            }
+            aria-current={pathname === "/" ? "page" : undefined}
           >
             সব পণ্য
-          </Link>
+          </Link> */}
 
           {catalog.loading
-            ? Array.from({ length: 6 }, (_, i) => (
+            ? Array.from({ length: 6 }, (_, index) => (
                 <span
-                  key={i}
+                  key={index}
                   className="skeleton bazar-nav-skeleton"
                 />
               ))
             : catalog.categories.map((category) => {
                 const href = `/category/${category.slug}`;
-
                 const active =
-                  pathname === href ||
-                  pathname.startsWith(`${href}/`);
+                  pathname === href || pathname.startsWith(`${href}/`);
 
                 return (
                   <Link
+                    key={category.slug}
                     href={href}
-                    key={category.id || category.slug}
                     className={`bazar-nav-link ${
                       active ? "is-active" : ""
                     }`}
-                    aria-current={
-                      active ? "page" : undefined
-                    }
+                    aria-current={active ? "page" : undefined}
                   >
-                    <span aria-hidden="true">
-                      {category.icon}
-                    </span>
+                    <span aria-hidden="true">{category.icon}</span>
                     {category.nameBn}
                   </Link>
                 );
@@ -266,39 +246,21 @@ export default function Navbar() {
       ) : catalog.error ? (
         <div className="bazar-ticker-error" role="alert">
           <span>{catalog.error}</span>
-
-          <button
-            type="button"
-            onClick={() => {
-              setCatalog((state) => ({
-                ...state,
-                loading: true,
-                error: "",
-              }));
-
-              setAttempt((value) => value + 1);
-            }}
-          >
+          <button type="button" onClick={retry}>
             আবার চেষ্টা করুন
           </button>
         </div>
-      ) : catalog.products.length > 0 ? (
-        <div
-          className="bazar-ticker"
-          aria-label="আজকের বাজারের দাম"
-        >
+      ) : catalog.products.length ? (
+        <div className="bazar-ticker" aria-label="আজকের বাজারের দাম">
           <div className="bazar-ticker-track">
             {[0, 1].map((copy) => (
               <div
-                className="bazar-ticker-group"
                 key={copy}
+                className="bazar-ticker-group"
                 aria-hidden={copy === 1 ? true : undefined}
               >
                 {catalog.products.map((product) => (
-                  <span
-                    className="bazar-ticker-item"
-                    key={product.id}
-                  >
+                  <span className="bazar-ticker-item" key={product.id}>
                     <span aria-hidden="true">
                       {product.image || product.categoryIcon}
                     </span>
@@ -306,7 +268,7 @@ export default function Navbar() {
                     <span>{product.nameBn}</span>
 
                     <strong>
-                      {number(Number(product.today))} টাকা/
+                      {banglaNumber(product.today)} টাকা/
                       {units[product.unit] || product.unit}
                     </strong>
 

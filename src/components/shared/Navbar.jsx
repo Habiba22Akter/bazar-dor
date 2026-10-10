@@ -198,15 +198,6 @@ export default function Navbar() {
           className="bazar-container bazar-category-nav"
           aria-label="পণ্যের বিভাগ"
         >
-          {/* <Link
-            href="/"
-            className={`bazar-nav-link ${
-              pathname === "/" ? "is-active" : ""
-            }`}
-            aria-current={pathname === "/" ? "page" : undefined}
-          >
-            সব পণ্য
-          </Link> */}
 
           {catalog.loading
             ? Array.from({ length: 6 }, (_, index) => (

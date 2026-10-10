@@ -1,4 +1,6 @@
 /* eslint-disable @next/next/no-page-custom-font */
+
+import { Suspense } from "react";
 import Navbar from "@/components/shared/Navbar";
 import Footer from "@/components/shared/Footer";
 import { Toaster } from "react-hot-toast";
@@ -11,10 +13,12 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    // <html lang="bn" data-theme="bazardor">
     <html lang="bn" data-theme="light">
       <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link
+          rel="preconnect"
+          href="https://fonts.googleapis.com"
+        />
 
         <link
           rel="preconnect"
@@ -29,9 +33,20 @@ export default function RootLayout({ children }) {
       </head>
 
       <body>
-        <Navbar />
+        <Suspense
+          fallback={
+            <div className="bazar-container py-6" role="status">
+              বাজার দর লোড হচ্ছে…
+            </div>
+          }
+        >
+          <Navbar />
+        </Suspense>
+
         <main>{children}</main>
+
         <Footer />
+
         <Toaster position="top-right" />
       </body>
     </html>

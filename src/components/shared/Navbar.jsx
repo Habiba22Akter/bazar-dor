@@ -3,7 +3,11 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useState, useSyncExternalStore } from "react";
+import {
+  useEffect,
+  useState,
+  useSyncExternalStore,
+} from "react";
 import toast from "react-hot-toast";
 import { authClient } from "@/lib/auth-client";
 
@@ -16,10 +20,12 @@ const units = {
 };
 
 function banglaNumber(value, digits = 0) {
+  const number = Number(value);
+
   return new Intl.NumberFormat("bn-BD", {
     minimumFractionDigits: digits,
     maximumFractionDigits: digits,
-  }).format(Number(value));
+  }).format(Number.isFinite(number) ? number : 0);
 }
 
 function subscribeDate(callback) {
@@ -37,14 +43,21 @@ function getDate() {
   }).format(new Date());
 }
 
+function getServerDate() {
+  return "";
+}
+
 function PriceChange({ change }) {
   const direction = change?.dir || "flat";
 
   return (
     <span className={`bazar-change ${direction}`}>
-      {direction === "up" ? "▲" : direction === "down" ? "▼" : "—"}
-      {" "}
-      {banglaNumber(Math.abs(Number(change?.pct || 0)), 1)}%
+      {direction === "up"
+        ? "▲"
+        : direction === "down"
+          ? "▼"
+          : "—"}{" "}
+      {banglaNumber(Math.abs(Number(change?.pct) || 0), 1)}%
     </span>
   );
 }
@@ -52,7 +65,13 @@ function PriceChange({ change }) {
 export default function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
-  const date = useSyncExternalStore(subscribeDate, getDate, () => "");
+
+  const date = useSyncExternalStore(
+    subscribeDate,
+    getDate,
+    getServerDate
+  );
+
   const { data: session, isPending } = authClient.useSession();
 
   const [catalog, setCatalog] = useState({
@@ -77,12 +96,31 @@ export default function Navbar() {
         const data = await response.json();
 
         if (!response.ok) {
-          throw new Error(data.message || "তথ্য লোড করা যায়নি");
+          throw new Error(
+            data?.message || "বাজারের তথ্য লোড করা যায়নি।"
+          );
         }
 
+        if (
+          !Array.isArray(data.categories) ||
+          !Array.isArray(data.products)
+        ) {
+          throw new Error("বাজারের তথ্য সঠিকভাবে পাওয়া যায়নি।");
+        }
+
+        if (controller.signal.aborted) return;
+
         setCatalog({
-          categories: data.categories,
-          products: data.products,
+          categories: data.categories.filter(
+            (category) =>
+              typeof category.slug === "string" &&
+              category.slug.trim()
+          ),
+          products: data.products.filter(
+            (product) =>
+              typeof product.slug === "string" &&
+              product.slug.trim()
+          ),
           loading: false,
           error: "",
         });
@@ -93,7 +131,10 @@ export default function Navbar() {
           categories: [],
           products: [],
           loading: false,
-          error: error.message || "বাজারের তথ্য লোড করা যায়নি।",
+          error:
+            error instanceof Error
+              ? error.message
+              : "বাজারের তথ্য লোড করা যায়নি।",
         });
       }
     }
@@ -114,20 +155,28 @@ export default function Navbar() {
   }
 
   async function handleSignOut() {
+    if (signingOut) return;
+
     setSigningOut(true);
 
     try {
       const { error } = await authClient.signOut();
 
       if (error) {
-        throw new Error(error.message || "সাইন আউট করা যায়নি");
+        throw new Error(
+          error.message || "সাইন আউট করা যায়নি।"
+        );
       }
 
       toast.success("সাইন আউট হয়েছে");
       router.push("/");
       router.refresh();
     } catch (error) {
-      toast.error(error.message || "সাইন আউট করা যায়নি");
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "সাইন আউট করা যায়নি।"
+      );
     } finally {
       setSigningOut(false);
     }
@@ -135,9 +184,13 @@ export default function Navbar() {
 
   return (
     <header className="bazar-header">
-      {/* Logo, date এবং auth buttons */}
+      {/* Logo, date এবং account buttons */}
       <div className="bazar-container bazar-topbar">
-        <Link href="/" className="bazar-brand" aria-label="বাজার দর হোম">
+        <Link
+          href="/"
+          className="bazar-brand"
+          aria-label="বাজার দর হোম"
+        >
           <span className="bazar-logo">
             <Image
               src="/assets/logo-icon.png"
@@ -158,11 +211,15 @@ export default function Navbar() {
           {isPending ? (
             <span
               className="skeleton h-10 w-32"
+              role="status"
               aria-label="অ্যাকাউন্ট লোড হচ্ছে"
             />
           ) : session?.user ? (
             <>
-              <Link href="/profile" className="btn btn-ghost btn-sm">
+              <Link
+                href="/profile"
+                className="btn btn-ghost btn-sm"
+              >
                 <span className="bazar-avatar">
                   {session.user.name?.slice(0, 1) || "●"}
                 </span>
@@ -180,11 +237,17 @@ export default function Navbar() {
             </>
           ) : (
             <>
-              <Link href="/signin" className="btn btn-ghost btn-sm">
+              <Link
+                href="/signin"
+                className="btn btn-ghost btn-sm"
+              >
                 সাইন ইন
               </Link>
 
-              <Link href="/signup" className="btn btn-primary btn-sm">
+              <Link
+                href="/signup"
+                className="btn btn-primary btn-sm"
+              >
                 সাইন আপ
               </Link>
             </>
@@ -192,13 +255,12 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* দ্বিতীয় row: API categories */}
+      {/* Category links */}
       <div className="bazar-nav-row">
         <nav
           className="bazar-container bazar-category-nav"
           aria-label="পণ্যের বিভাগ"
         >
-
           {catalog.loading
             ? Array.from({ length: 6 }, (_, index) => (
                 <span
@@ -207,9 +269,13 @@ export default function Navbar() {
                 />
               ))
             : catalog.categories.map((category) => {
-                const href = `/category/${category.slug}`;
+                const href = `/category/${encodeURIComponent(
+                  category.slug
+                )}`;
+
                 const active =
-                  pathname === href || pathname.startsWith(`${href}/`);
+                  pathname === href ||
+                  pathname?.startsWith(`${href}/`);
 
                 return (
                   <Link
@@ -220,7 +286,9 @@ export default function Navbar() {
                     }`}
                     aria-current={active ? "page" : undefined}
                   >
-                    <span aria-hidden="true">{category.icon}</span>
+                    <span aria-hidden="true">
+                      {category.icon}
+                    </span>
                     {category.nameBn}
                   </Link>
                 );
@@ -228,7 +296,7 @@ export default function Navbar() {
         </nav>
       </div>
 
-      {/* Navbar-এর নিচে infinite price ticker */}
+      {/* চলমান product price ticker */}
       {catalog.loading ? (
         <div className="bazar-ticker-loading" role="status">
           <span className="loading loading-spinner loading-xs" />
@@ -237,12 +305,16 @@ export default function Navbar() {
       ) : catalog.error ? (
         <div className="bazar-ticker-error" role="alert">
           <span>{catalog.error}</span>
+
           <button type="button" onClick={retry}>
             আবার চেষ্টা করুন
           </button>
         </div>
-      ) : catalog.products.length ? (
-        <div className="bazar-ticker" aria-label="আজকের বাজারের দাম">
+      ) : catalog.products.length > 0 ? (
+        <div
+          className="bazar-ticker"
+          aria-label="আজকের বাজারের দাম"
+        >
           <div className="bazar-ticker-track">
             {[0, 1].map((copy) => (
               <div
@@ -251,7 +323,14 @@ export default function Navbar() {
                 aria-hidden={copy === 1 ? true : undefined}
               >
                 {catalog.products.map((product) => (
-                  <span className="bazar-ticker-item" key={product.id}>
+                  <Link
+                    key={product.id ?? product.slug}
+                    href={`/product/${encodeURIComponent(
+                      product.slug
+                    )}`}
+                    className="bazar-ticker-item"
+                    tabIndex={copy === 1 ? -1 : undefined}
+                  >
                     <span aria-hidden="true">
                       {product.image || product.categoryIcon}
                     </span>
@@ -264,7 +343,7 @@ export default function Navbar() {
                     </strong>
 
                     <PriceChange change={product.change} />
-                  </span>
+                  </Link>
                 ))}
               </div>
             ))}

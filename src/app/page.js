@@ -1,5 +1,6 @@
 import Hero from "@/components/home/Hero";
 import PriceRisers from "@/components/home/PriceRisers";
+import PriceFallers from "@/components/home/PriceFallers";
 
 export default function Home() {
   return (
@@ -7,6 +8,8 @@ export default function Home() {
       <Hero />
 
       <PriceRisers />
+
+      <PriceFallers />
 
       <section
         id="সব-পণ্য"

@@ -758,3 +758,79 @@ a.bd-price-card:focus-visible {
     gap: 12px;
   }
 }
+
+
+
+
+
+
+/* Section B: আজ দাম কমেছে */
+.bd-fallers-heading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 16px;
+
+  color: #1d271f;
+  font-family: "Hind Siliguri", Arial, sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.bd-fallers-heading > span {
+  color: #159b50;
+  font-size: 16px;
+}
+
+/* Figma: green badge for falling prices */
+.bd-price-card .bd-price-card__change--down {
+  color: #159b50;
+  background: #f0f5f0;
+}
+
+/* Loading cards */
+.bd-price-card.bd-faller-skeleton {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 14px;
+
+  min-width: 0;
+  min-height: 138px;
+  padding: 16px;
+
+  background: #fafcfa;
+  border: 1px solid #e1e8e1;
+  border-radius: 16px;
+}
+
+@media (max-width: 600px) {
+  .bd-fallers-heading {
+    font-size: 22px;
+  }
+}
+
+
+
+.bazar-products-section .bd-fallers-heading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 16px;
+  color: #1d271f;
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.bazar-products-section .bd-fallers-heading > span {
+  color: #159b50;
+  font-size: 16px;
+}
+
+@media (max-width: 600px) {
+  .bazar-products-section .bd-fallers-heading {
+    font-size: 22px;
+  }
+}

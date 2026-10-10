@@ -75,10 +75,7 @@ async function ProductDetails({ params }) {
     Number(product.today) - Number(product.yesterday)
   );
 
-  const emoji =
-    product.category === "chal"
-      ? "🍚"
-      : product.image || product.categoryIcon;
+  const emoji = product.image || product.categoryIcon;
 
   const markets = (
     Array.isArray(product.markets) ? product.markets : []

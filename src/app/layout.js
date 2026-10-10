@@ -1,5 +1,6 @@
 /* eslint-disable @next/next/no-page-custom-font */
 import Navbar from "@/components/shared/Navbar";
+import Footer from "@/components/shared/Footer";
 import { Toaster } from "react-hot-toast";
 import "./globals.css";
 
@@ -30,6 +31,7 @@ export default function RootLayout({ children }) {
       <body>
         <Navbar />
         <main>{children}</main>
+        <Footer />
         <Toaster position="top-right" />
       </body>
     </html>

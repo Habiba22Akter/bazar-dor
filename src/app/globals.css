@@ -1,26 +1,300 @@
 @import "tailwindcss";
+@import "@heroui/styles"; 
+@plugin "daisyui" {
+  themes: light --default;
+}
+
+@plugin "daisyui/theme" {
+  name: "bazardor";
+  default: true;
+  color-scheme: light;
+
+  --color-base-100: #fafcfa;
+  --color-base-200: #f0f5f0;
+  --color-base-300: #e1e8e1;
+  --color-base-content: #1d271f;
+
+  --color-primary: #05893e;
+  --color-primary-content: #f3fbf4;
+
+  --radius-field: 0.5rem;
+  --radius-box: 1rem;
+}
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #f0f5f0;
+  --foreground: #1d271f;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: "Hind Siliguri", Arial, sans-serif;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  box-sizing: border-box;
 }
 
 body {
+  margin: 0;
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: "Hind Siliguri", Arial, sans-serif;
+}
+
+a,
+button {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Navbar */
+.bazar-header {
+  width: 100%;
+  background: #fafcfa;
+  border-bottom: 1px solid #e1e8e1;
+}
+
+.bazar-container {
+  width: min(1152px, calc(100% - 32px));
+  margin-inline: auto;
+}
+
+.bazar-topbar {
+  min-height: 68px;
+  padding-block: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+/* Logo এবং date */
+.bazar-brand {
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+}
+
+.bazar-logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.bazar-date {
+  margin-top: 4px;
+  font-size: 12px;
+  color: #687369;
+}
+
+/* Authentication */
+.bazar-auth {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.bazar-auth .btn {
+  min-height: 40px;
+  height: 40px;
+  padding-inline: 16px;
+  font-weight: 600;
+}
+
+.bazar-avatar {
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #e1eee4;
+  color: #05893e;
+}
+
+/* Category navigation */
+.bazar-nav-row {
+  border-top: 1px solid #e1e8e1;
+}
+
+.bazar-category-nav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-block: 8px;
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+
+.bazar-nav-link {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  gap: 5px;
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+  white-space: nowrap;
+  transition: background 0.2s;
+}
+
+.bazar-nav-link:hover {
+  background: #e5efe6;
+}
+
+.bazar-nav-link.is-active {
+  background: #05893e;
+  color: #fff;
+}
+
+.bazar-nav-skeleton {
+  width: 70px;
+  height: 32px;
+  flex-shrink: 0;
+}
+
+/* Scrolling price ticker */
+.bazar-ticker {
+  overflow: hidden;
+  background: #f0f5f0;
+  border-top: 1px solid #e1e8e1;
+}
+
+.bazar-ticker-track {
+  display: flex;
+  width: max-content;
+  animation: bazar-marquee 140s linear infinite;
+}
+
+.bazar-ticker-group {
+  display: flex;
+  flex-shrink: 0;
+}
+
+.bazar-ticker-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 36px;
+  padding-inline: 18px;
+  border-right: 1px solid #e1e8e1;
+  white-space: nowrap;
+  font-size: 14px;
+}
+
+.bazar-ticker-item strong {
+  font-weight: 600;
+}
+
+.bazar-change {
+  padding: 3px 7px;
+  border-radius: 6px;
+  font-size: 12px;
+  line-height: 18px;
+}
+
+.bazar-change.up {
+  color: #05893e;
+  background: #dff2e5;
+}
+
+.bazar-change.down {
+  color: #bd3d3d;
+  background: #fce7e7;
+}
+
+.bazar-change.flat {
+  color: #687369;
+  background: #e8ede8;
+}
+
+.bazar-ticker:hover .bazar-ticker-track {
+  animation-play-state: paused;
+}
+
+.bazar-ticker-loading,
+.bazar-ticker-error {
+  min-height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 6px 16px;
+  background: #f0f5f0;
+  font-size: 13px;
+}
+
+.bazar-ticker-error {
+  color: #bd3d3d;
+}
+
+.bazar-ticker-error button {
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+@keyframes bazar-marquee {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+/* Mobile */
+@media (max-width: 640px) {
+  .bazar-auth {
+    gap: 4px;
+  }
+
+  .bazar-auth .btn {
+    min-height: 34px;
+    height: 34px;
+    padding-inline: 10px;
+    font-size: 12px;
+  }
+
+  .bazar-logo {
+    font-size: 22px;
+  }
+
+  .bazar-date {
+    font-size: 10px;
+  }
+
+  .bazar-category-nav {
+    gap: 6px;
+  }
+
+  .bazar-nav-link {
+    padding-inline: 10px;
+  }
+
+  .bazar-avatar {
+    display: none;
+  }
+}
+
+@media (max-width: 360px) {
+  .bazar-container {
+    width: calc(100% - 24px);
+  }
+
+  .bazar-logo {
+    font-size: 20px;
+  }
+
+  .bazar-auth .btn {
+    padding-inline: 7px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bazar-ticker-track {
+    animation: none;
+  }
 }

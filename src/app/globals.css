@@ -569,3 +569,192 @@ html {
     scroll-behavior: auto;
   }
 }
+
+
+
+
+
+
+/* Section A — Figma layout */
+section.bazar-products-section {
+  margin-top: 40px;
+}
+
+.bd-risers-heading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  margin: 0 0 16px;
+  color: #1d271f;
+  font-family: "Hind Siliguri", Arial, sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.bd-risers-heading > span {
+  color: #df3636;
+  font-size: 16px;
+}
+
+.bazar-products-section .bazar-product-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+/* Card */
+a.bd-price-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 14px;
+
+  min-width: 0;
+  min-height: 138px;
+  padding: 16px;
+
+  background: #fafcfa;
+  border: 1px solid #e1e8e1;
+  border-radius: 16px;
+
+  color: #1d271f;
+  font-family: "Hind Siliguri", Arial, sans-serif;
+  text-decoration: none;
+}
+
+/* Emoji and name beside each other */
+.bd-price-card > .bd-price-card__top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.bd-price-card .bd-price-card__emoji {
+  display: grid;
+  place-items: center;
+  flex: 0 0 48px;
+
+  width: 48px;
+  height: 48px;
+  background: #f0f5f0;
+  border-radius: 12px;
+
+  font-size: 28px;
+  line-height: 1;
+}
+
+.bd-price-card .bd-price-card__info {
+  min-width: 0;
+}
+
+.bd-price-card .bd-price-card__info h3 {
+  margin: 0;
+  color: #1d271f;
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.bd-price-card .bd-price-card__info p {
+  margin: 3px 0 0;
+  color: #526357;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+/* Price left, badge right */
+.bd-price-card > .bd-price-card__bottom {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.bd-price-card .bd-price-card__label {
+  margin: 0 0 3px;
+  color: #526357;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.bd-price-card .bd-price-card__amount {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  margin: 0;
+  color: #1d271f;
+  line-height: 1.3;
+}
+
+.bd-price-card .bd-price-card__amount strong {
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.bd-price-card .bd-price-card__amount span {
+  font-size: 14px;
+}
+
+/* Rounded percentage badge */
+.bd-price-card .bd-price-card__change {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  padding: 4px 8px;
+  background: #f0f5f0;
+  border-radius: 999px;
+
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+.bd-price-card .bd-price-card__change--up {
+  color: #df3636;
+}
+
+.bd-price-card .bd-price-card__change--down {
+  color: #159b50;
+}
+
+.bd-price-card .bd-price-card__change--flat {
+  color: #687369;
+}
+
+a.bd-price-card:hover {
+  border-color: #05893e;
+}
+
+a.bd-price-card:focus-visible {
+  outline: 2px solid #05893e;
+  outline-offset: 3px;
+}
+
+/* Tablet */
+@media (max-width: 900px) {
+  .bazar-products-section .bazar-product-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* Mobile */
+@media (max-width: 600px) {
+  section.bazar-products-section {
+    margin-top: 32px;
+  }
+
+  .bd-risers-heading {
+    font-size: 22px;
+  }
+
+  .bazar-products-section .bazar-product-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+}

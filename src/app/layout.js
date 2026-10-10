@@ -10,7 +10,8 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="bn" data-theme="bazardor">
+    // <html lang="bn" data-theme="bazardor">
+    <html lang="bn" data-theme="light">
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
 

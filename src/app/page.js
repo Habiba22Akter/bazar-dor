@@ -1,9 +1,12 @@
 import Hero from "@/components/home/Hero";
+import PriceRisers from "@/components/home/PriceRisers";
 
 export default function Home() {
   return (
     <>
       <Hero />
+
+      <PriceRisers />
 
       <section
         id="সব-পণ্য"

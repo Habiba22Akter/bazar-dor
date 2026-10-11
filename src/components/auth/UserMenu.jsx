@@ -3,21 +3,54 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
-
 import { authClient } from "@/lib/auth-client";
+
+function LogoutIcon() {
+  return (
+    <svg
+      width="18"
+      height="18"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M8 8 3 13l5 5" />
+      <path d="M3 13h12a5 5 0 0 0 0-10" />
+    </svg>
+  );
+}
 
 export default function UserMenu() {
   const router = useRouter();
   const menuRef = useRef(null);
-
-  const {
-    data: session,
-    isPending,
-  } = authClient.useSession();
-
+  const { data: session, isPending } = authClient.useSession();
   const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    function handleOutsideClick(event) {
+      const menu = menuRef.current;
+
+      if (menu && !menu.contains(event.target)) {
+        menu.removeAttribute("open");
+      }
+    }
+
+    document.addEventListener("pointerdown", handleOutsideClick);
+
+    return () => {
+      document.removeEventListener("pointerdown", handleOutsideClick);
+    };
+  }, []);
+
+  function closeMenu() {
+    menuRef.current?.removeAttribute("open");
+  }
 
   async function handleLogout() {
     if (busy) return;
@@ -29,17 +62,15 @@ export default function UserMenu() {
 
       if (result.error) {
         throw new Error(
-          result.error.message ||
-            "সাইন আউট করা যায়নি।"
+          result.error.message || "সাইন আউট করা যায়নি।"
         );
       }
 
-      menuRef.current?.removeAttribute("open");
+      closeMenu();
 
-      toast.success(
-        "সাইন আউট হয়েছে।",
-        { id: "auth-feedback" }
-      );
+      toast.success("সাইন আউট হয়েছে।", {
+        id: "auth-feedback",
+      });
 
       router.replace("/");
       router.refresh();
@@ -91,54 +122,69 @@ export default function UserMenu() {
     <details
       ref={menuRef}
       className="ba-user-menu"
+      onKeyDown={(event) => {
+        if (event.key === "Escape") closeMenu();
+      }}
     >
-      <summary>
+      <summary aria-label="অ্যাকাউন্ট মেনু">
         {user.image ? (
           <Image
             unoptimized
             src={user.image}
             alt=""
-            width={36}
-            height={36}
+            width={40}
+            height={40}
             className="ba-user-avatar"
             referrerPolicy="no-referrer"
           />
         ) : (
           <span className="ba-user-avatar">
-            {user.name?.slice(0, 1)}
+            {user.name?.slice(0, 1) || "U"}
           </span>
         )}
 
-        <span>
-          {user.name?.split(" ")[0]}
+        <span className="ba-user-short-name">
+          {user.name?.trim().split(/\s+/)[0] || "প্রোফাইল"}
         </span>
 
-        <span aria-hidden="true">⌄</span>
+        <svg
+          className="ba-user-caret"
+          width="8"
+          height="8"
+          viewBox="0 0 8 8"
+          aria-hidden="true"
+        >
+          <path d="M2 3h4L4 6Z" fill="currentColor" />
+        </svg>
       </summary>
 
       <div className="ba-user-dropdown">
-        <strong>{user.name}</strong>
-        <p>{user.email}</p>
+        <div className="ba-user-info">
+          <strong>{user.name}</strong>
+          <p>{user.email}</p>
+        </div>
 
         <Link
           href="/profile"
-          onClick={() =>
-            menuRef.current?.removeAttribute(
-              "open"
-            )
-          }
+          className="ba-user-action"
+          onClick={closeMenu}
         >
-          আমার প্রোফাইল
+          <span className="ba-user-action-icon" aria-hidden="true">
+            👤
+          </span>
+          <span>আমার প্রোফাইল</span>
         </Link>
 
         <button
           type="button"
+          className="ba-user-action ba-user-signout"
           disabled={busy}
           onClick={handleLogout}
         >
-          {busy
-            ? "অপেক্ষা করুন…"
-            : "সাইন আউট"}
+          <LogoutIcon />
+          <span>
+            {busy ? "অপেক্ষা করুন…" : "সাইন আউট"}
+          </span>
         </button>
       </div>
     </details>

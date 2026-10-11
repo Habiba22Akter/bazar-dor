@@ -15,8 +15,6 @@ const units = {
 };
 
 
-
-
 function banglaNumber(value, digits = 0) {
   return new Intl.NumberFormat("bn-BD", {
     minimumFractionDigits: digits,

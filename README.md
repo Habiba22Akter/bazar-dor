@@ -4,7 +4,7 @@ BazarDor is a responsive market-price tracking application for everyday essentia
 
 ## 🔗 Project Links
 
-Live Website:
+Live Website: https://bazar-dor-ten-livid.vercel.app/   
 
 
 ## 🛠️ Technologies Used

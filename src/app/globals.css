@@ -249,13 +249,13 @@ html {
 }
 
 .bazar-change.up {
-  color: #05893e;
-  background: #dff2e5;
+  color: #bd3d3d;
+  background: #fce7e7;
 }
 
 .bazar-change.down {
-  color: #bd3d3d;
-  background: #fce7e7;
+  color: #05893e;
+  background: #dff2e5;
 }
 
 .bazar-change.flat {

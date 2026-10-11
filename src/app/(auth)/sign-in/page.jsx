@@ -1,11 +1,12 @@
-import React from 'react';
+import { Suspense } from "react";
 
-const SignInPage = () => {
-    return (
-        <div>
-            
-        </div>
-    );
-};
+import AuthForm from "@/components/auth/AuthForm";
+import AuthSkeleton from "@/components/auth/AuthSkeleton";
 
-export default SignInPage;
+export default function SignInPage() {
+  return (
+    <Suspense fallback={<AuthSkeleton />}>
+      <AuthForm mode="signin" />
+    </Suspense>
+  );
+}

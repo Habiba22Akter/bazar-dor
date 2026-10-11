@@ -19,7 +19,8 @@
     "next": "16.4.0",
     "react": "19.3.0",
     "react-dom": "19.3.0",
-    "react-hot-toast": "^2.6.1"
+    "react-hot-toast": "^2.6.1",
+    "vercel": "^63.1.2"
   },
   "devDependencies": {
     "@tailwindcss/turbopack": "^4",

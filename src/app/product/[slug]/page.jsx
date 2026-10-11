@@ -1,7 +1,10 @@
 import { Suspense } from "react";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { headers } from "next/headers";
+import { notFound, redirect } from "next/navigation";
+import { auth } from "@/lib/auth";
 import { getProductBySlug } from "@/lib/products";
+import { connection } from "next/server";
 
 const units = {
   kg: "কেজি",
@@ -11,6 +14,9 @@ const units = {
   piece: "পিস",
 };
 
+
+
+
 function banglaNumber(value, digits = 0) {
   return new Intl.NumberFormat("bn-BD", {
     minimumFractionDigits: digits,
@@ -18,15 +24,9 @@ function banglaNumber(value, digits = 0) {
   }).format(Number(value));
 }
 
-// পূর্ণসংখ্যা: ৬২
-// ভগ্নাংশ: ৬৩.৫০
 function marketPrice(value) {
   const number = Number(value);
-
-  return banglaNumber(
-    number,
-    Number.isInteger(number) ? 0 : 2
-  );
+  return banglaNumber(number, Number.isInteger(number) ? 0 : 2);
 }
 
 function DetailsLoading() {
@@ -34,20 +34,14 @@ function DetailsLoading() {
     <div
       className="bazar-container space-y-6 py-10"
       role="status"
+      aria-label="পণ্যের বিস্তারিত লোড হচ্ছে"
     >
-      <span className="sr-only">
-        পণ্যের বিস্তারিত লোড হচ্ছে…
-      </span>
-
       <div className="skeleton h-6 w-56" />
       <div className="skeleton h-44 w-full rounded-2xl" />
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         {[0, 1, 2].map((item) => (
-          <div
-            key={item}
-            className="skeleton h-28 rounded-xl"
-          />
+          <div key={item} className="skeleton h-28 rounded-xl" />
         ))}
       </div>
 
@@ -56,26 +50,41 @@ function DetailsLoading() {
   );
 }
 
+// async function ProductDetails({ params }) {
+//   const { slug } = await params;
+
 async function ProductDetails({ params }) {
+  await connection();
+
   const { slug } = await params;
+
+
+  // Invalid product হলে friendly 404।
   const product = await getProductBySlug(slug);
 
   if (!product) {
     notFound();
   }
 
+  // Server-side verification: preview দিয়ে login bypass হবে না।
+  const session = await auth.api.getSession({
+    headers: await headers(),
+    query: {
+      disableCookieCache: true,
+    },
+  });
+
+  if (!session?.user) {
+    redirect("/sign-in?reason=protected");
+  }
+
   const unit = units[product.unit] || product.unit;
   const direction = product.change?.dir || "flat";
-
-  const percentage = Math.abs(
-    Number(product.change?.pct) || 0
-  );
+  const percentage = Math.abs(Number(product.change?.pct) || 0);
 
   const difference = Math.abs(
     Number(product.today) - Number(product.yesterday)
   );
-
-  const emoji = product.image || product.categoryIcon;
 
   const markets = (
     Array.isArray(product.markets) ? product.markets : []
@@ -109,13 +118,10 @@ async function ProductDetails({ params }) {
     : null;
 
   const average = markets.length
-    ? markets.reduce(
-        (total, market) => total + market.average,
-        0
-      ) / markets.length
+    ? markets.reduce((total, market) => total + market.average, 0) /
+      markets.length
     : null;
 
-  // ওপরের summary card-এ Figma অনুযায়ী পূর্ণসংখ্যা
   function summaryPrice(value) {
     return value === null ? "—" : banglaNumber(value);
   }
@@ -135,9 +141,7 @@ async function ProductDetails({ params }) {
           </Link>
 
           <span aria-hidden="true">›</span>
-          <span aria-current="page">
-            {product.nameBn}
-          </span>
+          <span aria-current="page">{product.nameBn}</span>
         </nav>
 
         <section
@@ -149,13 +153,11 @@ async function ProductDetails({ params }) {
               className="bd-details__emoji"
               aria-hidden="true"
             >
-              {emoji}
+              {product.image || product.categoryIcon}
             </span>
 
             <div>
-              <h1 id="product-title">
-                {product.nameBn}
-              </h1>
+              <h1 id="product-title">{product.nameBn}</h1>
 
               <p className="bd-details__meta">
                 প্রতি {unit} ·{" "}
@@ -182,11 +184,7 @@ async function ProductDetails({ params }) {
 
           <div className="bd-details__today">
             <p>আজকের দাম</p>
-
-            <strong>
-              {banglaNumber(product.today)}
-            </strong>
-
+            <strong>{banglaNumber(product.today)}</strong>
             <p>টাকা / {unit}</p>
 
             <span
@@ -208,31 +206,25 @@ async function ProductDetails({ params }) {
           <div className="bd-details__stats">
             <div className="bd-details__stat">
               <p>সর্বনিম্ন দাম</p>
-
               <p className="bd-details__stat-price is-min">
                 <strong>{summaryPrice(minimum)}</strong> টাকা
               </p>
-
               <p>সবচেয়ে কম দামের বাজার</p>
             </div>
 
             <div className="bd-details__stat">
               <p>সর্বাধিক দাম</p>
-
               <p className="bd-details__stat-price is-max">
                 <strong>{summaryPrice(maximum)}</strong> টাকা
               </p>
-
               <p>সবচেয়ে বেশি দামের বাজার</p>
             </div>
 
             <div className="bd-details__stat">
               <p>গড় দাম</p>
-
               <p className="bd-details__stat-price is-average">
                 <strong>{summaryPrice(average)}</strong> টাকা
               </p>
-
               <p>প্রতি {unit}-এর হিসাবে</p>
             </div>
           </div>
@@ -241,12 +233,11 @@ async function ProductDetails({ params }) {
             বাজারভিত্তিক আজকের দাম
           </h2>
 
-          {markets.length > 0 ? (
+          {markets.length ? (
             <div className="bd-details__table-wrap overflow-x-auto">
               <table className="bd-details__table">
                 <caption className="sr-only">
-                  {product.nameBn} — বাজারভিত্তিক দাম,
-                  প্রতি {unit}, গড় দাম কম থেকে বেশি
+                  {product.nameBn} — প্রতি {unit}-এর বাজারভিত্তিক দাম
                 </caption>
 
                 <thead>
@@ -264,15 +255,8 @@ async function ProductDetails({ params }) {
                     <tr key={`${market.market}-${index}`}>
                       <td>{market.market}</td>
                       <td>{market.division}</td>
-
-                      <td>
-                        {marketPrice(market.min)} টাকা
-                      </td>
-
-                      <td>
-                        {marketPrice(market.max)} টাকা
-                      </td>
-
+                      <td>{marketPrice(market.min)} টাকা</td>
+                      <td>{marketPrice(market.max)} টাকা</td>
                       <td>
                         <strong>
                           {marketPrice(market.average)} টাকা
